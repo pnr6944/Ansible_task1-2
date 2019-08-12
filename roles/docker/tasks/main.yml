@@ -1,5 +1,9 @@
 ---
 # tasks file for docker
+- name: installing the  GIT
+  yum:
+    name: git
+    state: present 
 - name: install docker
   yum:
     name: docker

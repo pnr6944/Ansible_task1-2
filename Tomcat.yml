@@ -1,0 +1,147 @@
+--- 
+ - name: <name playbook name>
+   hosts: <Dev/Prod/test>
+   become: true
+   tasks:
+     - name: install Zip
+       yum:
+         name: unzip
+         state: present         
+     - name: Java_Install_on_1.8
+       yum:
+         name: java-1.8.0-openjdk-devel
+         state: present
+     - name: Copy apache-tomcat-7.0.96.tar
+       copy:
+         src: <??Srv/home/ec2-user/<file.zip>>
+         dest: /opt
+  	 - name: Extract apache-tomcat-7.0.96.tar into/opt/tomcat/
+       unarchive:
+         src: </opt/apache-tomcat-7.0.96.tar>
+         dest: </opt>
+         remote_src: yes
+	    - name: Move apache-tomcat-7 to /opt/tomcat
+        command: mv /opt/<tomcat-7> /opt/<new name>
+	    - name: Copy file with owner and permissions
+        copy:
+          src: </AM-eval-6.5.2.1/myfiles.zip>
+          dest: /opt/
+          owner: ec2-user
+          group: ec2-user
+          mode: '0644'
+      - name: Unarchive a file that is already on the remote machine
+        unarchive:
+          src: <</opt//AM-eval-6.5.2.1.zip>>
+          dest: /opt/
+          remote_src: yes
+	    - name: Copy file with owner and permissions
+	      copy:
+          src: </srv/Amster-6.5.2.1.zip/>
+          dest: </opt/>
+          owner: ec2-user
+          group: ec2-user
+          mode: '0644'
+	    - name: Unarchive a file that is already on the remote machine
+        unarchive:
+          src: <</opt/Amster-6.5.2.1.zip>>
+          dest: /opt
+          remote_src: yes
+	    - name: Copy file with owner and permissions
+        copy:
+          src: </srv/amfiles.zip>>
+          dest: <</opt/>>
+          owner: ec2-user
+          group: ec2-user
+          mode: '0644'
+      - name: Unarchive a file that is already on the remote machine
+        unarchive:
+          src: <</opt/amfiles.zip>>
+          dest: /opt
+          remote_src: yes		 
+      - name: Install fireD
+       yum:
+         name: firewalld
+         state: present
+     - name: started
+       service:
+         name: firewalld
+         state: started
+         enabled: yes
+     - name: Execute the command on remote.
+       shell:
+         cmd: "{{ item }}"
+       with_items:
+             - 'firewall-cmd --permanent --add-port=443/tcp'
+             - 'firewall-cmd --permanent --add-port=8443/tcp'
+             - 'firewall-cmd --permanent --add-port=4444/tcp'
+             - 'firewall-cmd --permanent --add-port=8080/tcp'
+             - 'firewall-cmd --permanent --add-port=636/tcp'
+             - 'firewall-cmd --reload '
+             - 'firewall-cmd --list-all'
+	  - name: Move AM-eval-6.5.2.1.war
+      command: mv /opt/AM-eval-6.5.2.1.war /opt/tomcat/webapps/dawshill.war
+    - name: Copy file with owner and permissions
+      copy:
+        src: </srv/Hostfile>>
+        dest: <<home/ec2-user>>
+        owner: ec2-user
+        group: ec2-user
+        mode: '0644'
+    - name: Move Hosts
+      command: mv /home/ec2-user/hosts /etc/hosts
+    - name: Remove file (server.xml)
+      file:
+        path: /opt/tomcat/conf/server.xml
+        state: absent
+    - name: copy , group and permissions
+      file:
+        src: <local/server.xml >
+        dest: /opt/tomcat/conf/
+        owner: ec2-user
+        group: ec2-user
+        mode: '0644'
+    - name: Remove file (server.xml)
+      file:
+        path: /opt/tomcat/conf/web.xml
+        state: absent
+    - name: copy , group and permissions
+      file:
+        src: <local/web.xml  >
+        dest: /opt/tomcat/conf/
+        owner: ec2-user
+        group: ec2-user
+        mode: '0644'
+    - name: copy tomcat.jks , group and permissions
+      file:
+        src: <local/tomcat.jks  >
+        dest: /opt/tomcat/conf/
+        owner: ec2-user
+        group: ec2-user
+        mode: '0644'
+    - name: Add group "tomcat"
+      group: 
+        name=tomcat
+        become: true
+    - name: This command change add low permission user tomcat without sign in ability to tomcat group  
+      shell:
+        cmd: useradd -a -G tomcat ec2-user
+    - name: create tomcat directory for app usage of the tomcat user
+      file:
+        path: /home/tomcat
+        state: directory
+        mode: '0755'
+- name: Change the working directory to somedir/ before executing the command.
+  shell:
+  args:
+    chdir:/home/tomcat
+    cmd: 
+      - chown -R tomcat:tomcat /home/tocmat
+      - chown -R tomcat:tomcat /opt/tocmat
+- name: Ansible delete multiple file example
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - /opt/Amster-6.5.2.1.zip
+        - /opt/amfiles.zip
+        - /opt/AM-eval-6.5.2.1.zip
